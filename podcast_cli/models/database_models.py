@@ -28,7 +28,7 @@ class EpisodeModel(Model):
     link = CharField(unique=True)
     guid = CharField(unique=True)
     pubDate = TimestampField()
-    podcast = ForeignKeyField(PodcastModel)
+    podcast = ForeignKeyField(PodcastModel, on_delete="CASCADE")
 
     class Meta:
         database = db

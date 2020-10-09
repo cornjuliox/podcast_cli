@@ -53,81 +53,12 @@ def cli():
     db.create_tables([PodcastModel, EpisodeModel])
 
 
-# No positional arguments! explicit actions are the best actions
-# CLI ARG: podcast_add - takes a name and a link to an
-#       RSS feed / XML file, and creates a Podcast row.
-# @click.command()
-# @click.argument("name")
-# @click.argument("link")
-# def podcast_add(name: str, link: str):
-#     """
-#     Adds a podcast to the database.
-
-#     input:
-#     name: str - the name of the podcast.
-#     link: str - the link the podcast's RSS feed, which usually an XML file.
-#     """
-#     click.echo("You're adding a podcast.")
-#     while True:
-#         click.echo(
-#             "You're adding podcast '{}', at link {}.".format(name, link)
-#         )
-#         val = click.prompt("Is this correct? y/n")
-#         if val.lower() == "y":
-#             rows: PodcastModel = PodcastModel.create(
-#                 title=name,
-#                 link=link
-#             )
-#             # TODO: Maybe reconsider my decision to require the pk as part
-#             #       of the usage of MainPodcastParser.
-#             #       The fact that I need to create a table row before I can
-#             #       use MPP to get the metadata suggests something wrong
-#             #       with the way I'm thinking about things...
-#             mpp: MainPodcastParser = MainPodcastParser(url=link, pk=rows.id)
-#             desc: PodcastDescription = mpp.get_podcast_metadata()
-#             # NOTE: In cases of update()s, the .execute() method actually
-#             #       executes the SQL and returns the result of the operation
-#             #       i.e the number of rows modified.
-#             update_query: int = (
-#                 PodcastModel.update(
-#                     description=desc["description"],
-#                     guid=desc["guid"]
-#                 )
-#                 .where(PodcastModel.id == rows.id)
-#                 .execute()
-#             )
-#             click.echo(
-#                 "Successfully updated metadata on {} row"
-#                 .format(update_query)
-#             )
-#             click.echo(
-#                 "Successfully added {} podcast to the database"
-#                 .format(rows.title)
-#             )
-#             break
-#         else:
-#             break
-#     return
-
-
 # CLI ARG: podcast_remove - takes the PK of the podcast in question and
 #       removes its entry from the database.
 @click.command()
 def podcast_remove():
     click.echo("You're removing a podcast.")
 
-
-# CLI ARG: podcast_list - lists all podcasts currently in the database
-#       (names and links only)
-@click.command()
-def podcast_list():
-    click.echo("You're listing all currently stored podcasts.")
-    podcasts: List[PodcastDescription] = query_all_podcasts()
-    for x in podcasts:
-        x["episode_count"] = EpisodeModel.select().where(EpisodeModel.podcast == x['pk']).count()
-    # NOTE: click.echo() as opposed to print for proper
-    #       cross-terminal compatibility!
-    click.echo(tabulate(podcasts, headers="keys", tablefmt="github"))
 
 
 # CLI ARG: podcast_inspect - takes the PK of a podcast and prints its
@@ -254,8 +185,10 @@ def podcast_update():
 # CLI ARG: test - fetches all the episodes and dumps them to a file
 #       for inspection just like it does presently.
 from podcast_cli.views.add_podcast_command import podcast_add
+from podcast_cli.views.list_podcast_command import podcast_list
+from podcast_cli.views.remove_podcast_command import podcast_remove
 cli.add_command(podcast_add)
-# cli.add_command(podcast_remove)
+cli.add_command(podcast_remove)
 cli.add_command(podcast_list)
 # cli.add_command(podcast_init)
 # cli.add_command(podcast_inspect)

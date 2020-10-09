@@ -1,5 +1,4 @@
 from typing import List, Dict
-import json
 
 import click
 from tabulate import tabulate
@@ -52,5 +51,5 @@ def podcast_add(url: str):
     }
 
     podcastoutput["episode_count"] = len(episodes)
-
-    click.echo(tabulate([podcastoutput], headers="keys"))
+    click.echo("Below is a summary of the podcasts added")
+    click.echo(tabulate([podcastoutput], headers="keys", tablefmt="grid"))
