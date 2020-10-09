@@ -1,16 +1,37 @@
 import requests
 import arrow  # type: ignore
 from bs4 import BeautifulSoup, ResultSet, Tag  # type: ignore
-from typing import List
-from podcast_cli.parsers.customtypes import PodcastEpisode, PodcastDescription
+from typing import List, Optional
+
+from podcast_cli.models.custom_types import (
+    PodcastType,
+    EpisodeType,
+    PodcastEpisodeBundle
+)
+from podcast_cli.models.database_models import (
+    PodcastModel,
+    EpisodeModel
+)
+
+from podcast_cli.parsers.customtypes import (
+    PodcastEpisode,
+    PodcastDescription,
+    PodcastEpisodeSet
+)
 
 
 # NOTE: So it turns out that all the podcasts I looked at have the same
 #       format for their xml feeds - this simplifies things greatly.
 #       Assuming (and hoping) that the formats don't change at some point
 #       then this should be enough....
+
+
+# TODO: Expand / adjust this to create a PodcastModel and EpisodeModels on add.
+#       I'm probably going to mothball this one.
 class MainPodcastParser():
-    def __init__(self, url):
+    def __init__(self, url: str, pk: str):
+        self.url: str = url
+        self.pk: str = pk
         self.res: requests.models.Response = requests.get(url)
         self.soup: BeautifulSoup = BeautifulSoup(self.res.text, "xml")
 
@@ -35,9 +56,12 @@ class MainPodcastParser():
             url=item.enclosure["url"]
         )
 
-    def get(self) -> List[PodcastEpisode]:
+    def get(self) -> PodcastEpisodeSet:
         items: ResultSet = self.soup.find_all("item")
-        return sorted(
-            [self.extract_details(i) for i in items],
-            key=lambda x: -(x["pubDate"])
+        return PodcastEpisodeSet(
+            pk=self.pk,
+            episodes=sorted(
+                [self.extract_details(i) for i in items],
+                key=lambda x: -(x["pubDate"])
+            )
         )

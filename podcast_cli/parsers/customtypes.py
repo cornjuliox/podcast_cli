@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import TypedDict, List, Optional
 
 import arrow  # type: ignore
 
@@ -18,3 +18,8 @@ class PodcastDescription(TypedDict, total=False):
     description: str
     link: str
     guid: str
+
+
+class PodcastEpisodeSet(TypedDict):
+    pk: str
+    episodes: List[PodcastEpisode]
