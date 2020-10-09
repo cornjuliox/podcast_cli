@@ -4,6 +4,7 @@ import click
 from tabulate import tabulate
 from bs4 import BeautifulSoup
 from playhouse.shortcuts import model_to_dict
+from peewee import DoesNotExist
 
 from podcast_cli.controllers.parser import (
     parse_podcast_xml,
@@ -16,6 +17,7 @@ from podcast_cli.models.custom_types import (
     PodcastEpisodeBundle,
     EpisodeType
 )
+from podcast_cli.models.database_models import PodcastModel
 
 # from tabulate import tabulate
 # from peewee import Query  # type: ignore
@@ -30,8 +32,16 @@ from podcast_cli.models.custom_types import (
 @click.argument("url")
 def podcast_add(url: str):
     soup: BeautifulSoup = parse_podcast_xml(url)
-
     cast: PodcastType = parse_podcast_metadata(soup)
+
+    # NOTE: This is a guard to ensure that podcasts don't get added twice
+    try:
+        PodcastModel.get(PodcastModel.guid == cast["guid"])
+        click.echo("This podcast already exists in our system!")
+        return
+    except DoesNotExist:
+        pass
+
     # NOTE: I've decided i want the link to be to the rss feed and not
     # to the homepage. The override is out here.
     cast["link"]: str = url
