@@ -1,5 +1,5 @@
 import click
-from peewee import Query, DoesNotExist
+from peewee import DoesNotExist  # type: ignore
 from podcast_cli.models.database_models import PodcastModel
 
 
@@ -10,9 +10,10 @@ def podcast_remove(pk: int):
     try:
         pc: PodcastModel = PodcastModel.get_by_id(pk)
         click.echo("Podcast {} - {}".format(pk, pc.title))
-        click.echo("Warning! Deleting this podcast entry will remove all of its episode listings locally as well!")
+        click.echo("Warning! Deleting this podcast entry will remove all of its episode listings locally as well!")   # noqa: E501
     except DoesNotExist:
         click.echo("Podcast with id {} does not exist.".format(pk))
+        return
 
     while True:
         choice: str = click.prompt("Delete this podcast? Y/n")
@@ -21,5 +22,7 @@ def podcast_remove(pk: int):
             click.echo("Podcast has been deleted, and all episodes removed.")
             break
         elif choice.lower() == 'n':
-            click.echo("Exiting")
+            click.echo("Exiting.")
             break
+
+    return

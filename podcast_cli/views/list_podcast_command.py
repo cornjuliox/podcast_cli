@@ -2,8 +2,8 @@ from typing import List, Dict
 
 import click
 from tabulate import tabulate
-from peewee import Query
-from playhouse.shortcuts import model_to_dict
+from peewee import Query  # type: ignore
+from playhouse.shortcuts import model_to_dict  # type: ignore
 
 from podcast_cli.models.database_models import PodcastModel
 from podcast_cli.views.utils import exclude_keys

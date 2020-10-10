@@ -1,7 +1,7 @@
 import requests
 import arrow  # type: ignore
 from bs4 import BeautifulSoup, ResultSet, Tag  # type: ignore
-from typing import List, Optional
+from typing import List
 
 from podcast_cli.models.custom_types import (
     PodcastType,

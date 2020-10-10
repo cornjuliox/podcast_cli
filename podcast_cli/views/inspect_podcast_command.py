@@ -1,7 +1,7 @@
 import click
 from tabulate import tabulate
-from peewee import DoesNotExist
-from playhouse.shortcuts import model_to_dict
+from peewee import DoesNotExist                 # type: ignore
+from playhouse.shortcuts import model_to_dict   # type: ignore
 
 from podcast_cli.models.database_models import PodcastModel
 from podcast_cli.views.utils import exclude_keys
@@ -17,6 +17,6 @@ def podcast_inspect(pk: int):
         return
 
     dict_cast: dict = model_to_dict(cast)
-    filtered_cast: dict = exclude_keys(dict_cast, "description")
+    filtered_cast: dict = exclude_keys(dict_cast, ["description"])
 
     click.echo(tabulate([filtered_cast], headers="keys", tablefmt="grid"))

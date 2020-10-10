@@ -2,9 +2,9 @@ from typing import List, Dict
 
 import click
 from tabulate import tabulate
-from bs4 import BeautifulSoup
-from playhouse.shortcuts import model_to_dict
-from peewee import DoesNotExist
+from bs4 import BeautifulSoup                       # type: ignore
+from playhouse.shortcuts import model_to_dict       # type: ignore
+from peewee import DoesNotExist                     # type: ignore
 
 from podcast_cli.controllers.parser import (
     parse_podcast_xml,
@@ -18,6 +18,7 @@ from podcast_cli.models.custom_types import (
     EpisodeType
 )
 from podcast_cli.models.database_models import PodcastModel
+from podcast_cli.views.utils import exclude_keys
 
 # from tabulate import tabulate
 # from peewee import Query  # type: ignore
@@ -44,10 +45,10 @@ def podcast_add(url: str):
 
     # NOTE: I've decided i want the link to be to the rss feed and not
     # to the homepage. The override is out here.
-    cast["link"]: str = url
-    episodes: List[EpisodeType] = parse_podcast_episodeset(soup)
+    cast["link"] = url
+    raw_episodes: List[EpisodeType] = parse_podcast_episodeset(soup)
 
-    bundle: PodcastEpisodeBundle = insert_to_db(cast, episodes)
+    bundle: PodcastEpisodeBundle = insert_to_db(cast, raw_episodes)
     parent: Dict = model_to_dict(bundle[0])
 
     episodes: List[Dict] = [model_to_dict(ep) for ep in bundle[1]]
@@ -55,10 +56,7 @@ def podcast_add(url: str):
     # NOTE: printing large bodies of text through tabulate breaks it
     #       in terrible ways. to mitigate this I will
     #       exclude them selectively, manually.
-    podcastoutput: dict = {
-        k: parent[k]
-        for k in ["title", "link", "guid"]
-    }
+    podcastoutput: dict = exclude_keys(parent, ["description"])
 
     podcastoutput["episode_count"] = len(episodes)
     click.echo("Below is a summary of the podcasts added")

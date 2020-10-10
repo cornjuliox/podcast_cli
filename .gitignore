@@ -140,3 +140,4 @@ cython_debug/
 # local files that shouldn't be in github
 results.json
 datastore.db
+*.json
