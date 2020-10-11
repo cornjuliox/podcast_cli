@@ -44,6 +44,7 @@ def parse_podcast_episodeset(soup: BeautifulSoup) -> List[EpisodeType]:
     items: ResultSet = soup.find_all("item")
     return sorted(
         [__extract_details(item) for item in items],
+        # NOTE: I realize this might be redundant but I'm doing it anyways.
         key=lambda x: -(x["pubDate"])
     )
 
