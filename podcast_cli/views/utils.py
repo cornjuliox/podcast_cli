@@ -37,16 +37,15 @@ def get_latest_number(cast: PodcastModel, max_limit: int) -> List[dict]:
     )
     step1: List[dict] = [model_to_dict(x) for x in query]
 
+    # NOTE: model_to_dict includes the entire PodcastModel object
+    #       as a sub-object. This will break tabulate(), so I
+    #       exclude_keys() and replace it with a new "podcast" key with only
+    #       its title.
     step2: List[dict] = [
         exclude_keys(d, ["description", "guid", "link", "podcast"])
         for d in step1
     ]
 
-    # NOTE: model_to_dict includes the entire PodcastModel object
-    #       as a sub-object. This will break tabulate(), so I
-    #       exclude_keys() the podcast object in the step above
-    #       and replace it with a new "podcast" key with only
-    #       its title.
     for d in step2:
         d["podcast"] = cast.title
 

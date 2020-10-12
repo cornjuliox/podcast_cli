@@ -4,6 +4,7 @@ from podcast_cli.models.database_models import PodcastModel, EpisodeModel, db
 from podcast_cli.views.add_podcast_command import podcast_add
 from podcast_cli.views.list_podcast_command import podcast_list
 from podcast_cli.views.remove_podcast_command import podcast_remove
+from podcast_cli.views.update_podcast_command import podcast_update
 from podcast_cli.views.inspect_podcast_command import podcast_inspect
 from podcast_cli.views.list_podcast_episodes_command import podcast_list_episodes
 from podcast_cli.views.list_podcast_latest_episode_command import podcast_list_latest_episodes
@@ -28,6 +29,7 @@ def cli():
 cli.add_command(podcast_add)
 cli.add_command(podcast_list)
 cli.add_command(podcast_remove)
+cli.add_command(podcast_update)
 cli.add_command(podcast_inspect)
 cli.add_command(podcast_list_episodes)
 cli.add_command(podcast_list_latest_episodes)

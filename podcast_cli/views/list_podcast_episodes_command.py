@@ -15,6 +15,9 @@ from podcast_cli.views.utils import exclude_keys
 def podcast_list_episodes(pk: int):
     try:
         parent: PodcastModel = PodcastModel.get_by_id(pk)
+        click.echo(
+            "Listing all recorded episodes for podcast {}".format(parent.title)
+        )
     except DoesNotExist:
         click.echo("No podcast with that id exists. Check id and try again.")
         return
