@@ -1,10 +1,10 @@
-from typing import Optional, List, Dict
+from typing import Optional, List
 
 import click
-import arrow
-from peewee import ModelObjectCursorWrapper
-from playhouse.shortcuts import model_to_dict
-from bs4 import BeautifulSoup
+import arrow                                        # type: ignore
+from peewee import ModelObjectCursorWrapper         # type: ignore
+from playhouse.shortcuts import model_to_dict       # type: ignore
+from bs4 import BeautifulSoup                       # type: ignore
 from tabulate import tabulate
 
 from podcast_cli.models.database_models import (
@@ -12,7 +12,7 @@ from podcast_cli.models.database_models import (
     EpisodeModel
 )
 from podcast_cli.models.custom_types import EpisodeType
-from podcast_cli.views.utils import exclude_keys
+from podcast_cli.views.utils import exclude_keys, prep_ep_for_report
 from podcast_cli.controllers.parser import (
     parse_podcast_episodeset,
     parse_podcast_xml
@@ -24,7 +24,7 @@ def get_timestamp(some_date: str) -> int:
 
 
 def get_latest_episode_remote(podcast: PodcastModel) -> EpisodeType:
-    click.echo("Fetching latest episodes for {}".format(podcast.title))
+    click.echo("Fetching latest episode for {}".format(podcast.title))
     res: BeautifulSoup = parse_podcast_xml(podcast.link)
     eps: List[EpisodeType] = parse_podcast_episodeset(res)
     sorted_eps: List[EpisodeType] = sorted(
@@ -57,6 +57,20 @@ def get_latest_episode_local(podcast: PodcastModel) -> dict:
     return ep
 
 
+def is_remote_newer(remote: dict, local: dict) -> bool:
+    r_timestamp: int = get_timestamp(remote["pubDate"])
+    l_timestamp: int = get_timestamp(local["pubDate"])
+
+    is_different: bool = remote["guid"] > local["guid"]
+    is_more_recent: bool = r_timestamp > l_timestamp
+
+    if is_different and is_more_recent:
+        return True
+    else:
+        return False
+
+
+
 @click.command()
 @click.option("--pk", default=None)
 def podcast_update(pk: Optional[int]):
@@ -68,11 +82,8 @@ def podcast_update(pk: Optional[int]):
         #       EpisodeType == Dict
         latest_feed: EpisodeType = get_latest_episode_remote(parent)
         latest_local: dict = get_latest_episode_local(parent)
-        is_different: bool = latest_feed["guid"] != latest_local["guid"]
-        is_more_recent: bool = (
-            get_timestamp(latest_feed["pubDate"]) > get_timestamp(latest_local["pubDate"])
-        )
-        if is_different and is_more_recent:
+
+        if is_remote_newer(latest_feed, latest_local):
             click.echo("Found a new episode:")
             click.echo(
                 tabulate(
@@ -100,8 +111,47 @@ def podcast_update(pk: Optional[int]):
     else:
         parents: ModelObjectCursorWrapper = PodcastModel.select().execute()
         click.echo("Checking all podcasts for new episodes.")
-        mapping: dict = {
-            parent.id: get_latest_episode_remote(parent)
-            for parent in parents
+        ez_ref: dict = {
+            p.id: p
+            for p in parents
         }
-        # click.echo(tabulate(latest_eps, headers="keys", tablefmt="grid"))
+        latest_remote_mapping: dict = {
+            k[0]: get_latest_episode_remote(k[1])
+            for k in ez_ref.items()
+        }
+        latest_local_mapping: dict = {
+            k[0]: get_latest_episode_local(k[1])
+            for k in ez_ref.items()
+        }
+        results: dict = {
+            k: v
+            for k, v in latest_remote_mapping.items()
+            if is_remote_newer(v, latest_local_mapping[k])
+        }
+
+        click.echo("Found {} new episodes!".format(len(results)))
+
+        # "assembly"
+        db_insert_results: List[EpisodeModel] = [
+            EpisodeModel.create(
+                title=v["title"],
+                description=v["description"],
+                pubDate=v["pubDate"],
+                link=v["link"],
+                guid=v["guid"],
+                podcast=ez_ref[k]
+            )
+            for k, v in results.items()
+        ]
+
+        # "reporting"
+        pre_report: List[dict] = [
+            exclude_keys(model_to_dict(m), ["description", "link"])
+            for m in db_insert_results
+        ]
+        report: List[dict] = [
+            prep_ep_for_report(ep)
+            for ep in pre_report
+        ]
+
+        click.echo(tabulate(report, headers="keys", tablefmt="grid"))
