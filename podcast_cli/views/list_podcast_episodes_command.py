@@ -30,6 +30,7 @@ def podcast_list_episodes(pk: int):
     raw_episodes: List[EpisodeModel] = [ep for ep in q]
 
     dict_episodes: List[Dict] = [model_to_dict(ep) for ep in raw_episodes]
+    # TODO: refactor this to use the new prep_ep_for_report() function.
     filtered_dict: List[Dict] = [
         exclude_keys(ep, ["description", "podcast", "link", "guid"])
         for ep in dict_episodes

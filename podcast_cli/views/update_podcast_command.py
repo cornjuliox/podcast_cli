@@ -40,7 +40,7 @@ def get_latest_episode_remote(podcast: PodcastModel) -> EpisodeType:
     return sorted_eps[0]
 
 
-def get_latest_episode_local(podcast: PodcastModel) -> dict:
+def get_latest_episode_local(podcast: PodcastModel) -> EpisodeType:
     click.echo(
         "Checking latest stored episode for podcast {}".format(podcast.title)
     )
@@ -52,12 +52,19 @@ def get_latest_episode_local(podcast: PodcastModel) -> dict:
     )
 
     dict_ep: dict = model_to_dict(raw_ep)
-    ep = exclude_keys(dict_ep, ["description", "link"])
+    # ep = exclude_keys(dict_ep, ["description", "link"])
 
-    return ep
+    return EpisodeType(
+        pk=dict_ep.get("id", None),
+        title=dict_ep.get("title", None),
+        description=dict_ep.get("description", None),
+        pubDate=dict_ep.get("pubDate", None),
+        guid=dict_ep.get("guid", None),
+        link=dict_ep.get("link", None),
+    )
 
 
-def is_remote_newer(remote: dict, local: dict) -> bool:
+def is_remote_newer(remote: EpisodeType, local: EpisodeType) -> bool:
     r_timestamp: int = get_timestamp(remote["pubDate"])
     l_timestamp: int = get_timestamp(local["pubDate"])
 
@@ -70,7 +77,6 @@ def is_remote_newer(remote: dict, local: dict) -> bool:
         return False
 
 
-
 @click.command()
 @click.option("--pk", default=None)
 def podcast_update(pk: Optional[int]):
@@ -81,7 +87,7 @@ def podcast_update(pk: Optional[int]):
         # NOTE: List[EpisodeType] == List[dict] and
         #       EpisodeType == Dict
         latest_feed: EpisodeType = get_latest_episode_remote(parent)
-        latest_local: dict = get_latest_episode_local(parent)
+        latest_local: EpisodeType = get_latest_episode_local(parent)
 
         if is_remote_newer(latest_feed, latest_local):
             click.echo("Found a new episode:")
@@ -149,7 +155,7 @@ def podcast_update(pk: Optional[int]):
             exclude_keys(model_to_dict(m), ["description", "link"])
             for m in db_insert_results
         ]
-        report: List[dict] = [
+        report: List[EpisodeType] = [
             prep_ep_for_report(ep)
             for ep in pre_report
         ]

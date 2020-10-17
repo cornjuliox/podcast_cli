@@ -11,6 +11,7 @@ class EpisodeType(TypedDict, total=False):
     pubDate: arrow.Arrow
     guid: str
     link: str
+    podcast: str
 
 
 class PodcastType(TypedDict, total=False):
@@ -19,6 +20,7 @@ class PodcastType(TypedDict, total=False):
     description: str
     link: str
     guid: str
+    podcast: str
 
 
 PodcastEpisodeBundle = NewType(

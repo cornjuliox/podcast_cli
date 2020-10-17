@@ -1,3 +1,4 @@
+import os
 import click
 
 from podcast_cli.models.database_models import PodcastModel, EpisodeModel, db
@@ -10,6 +11,7 @@ from podcast_cli.views.list_podcast_episodes_command import podcast_list_episode
 from podcast_cli.views.list_podcast_latest_episode_command import podcast_list_latest_episodes
 
 
+# disregard this it isn't being used anywhere.
 podcast_mapping = {
     "Planet Money": "https://feeds.npr.org/510289/podcast.xml",
     "Behind The Bastards": "https://feeds.megaphone.fm/behindthebastards",
@@ -22,6 +24,13 @@ podcast_mapping = {
 def cli():
     # NOTE: Until I see evidence to suggest that this is a bad idea, I am going
     #       to put the db connection code here.
+    full_path: str = os.path.expanduser("~/.podcasts")
+    if not os.path.exists(full_path):
+        click.echo("NO PODCAST DIRECTORY FOUND, CREATING ONE.")
+        os.mkdir(full_path)
+        click.echo("IF YOU SEE THIS, A DIRECTORY WAS MADE")
+    else:
+        click.echo("PODCASTS STORED AT {}".format(full_path))
     db.connect()
     db.create_tables([PodcastModel, EpisodeModel])
 

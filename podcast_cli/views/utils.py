@@ -1,17 +1,18 @@
-from typing import List, Mapping
+from typing import List, Mapping, Union
 
-import arrow
+import arrow                                    # type: ignore
 from peewee import ModelObjectCursorWrapper     # type: ignore
 from playhouse.shortcuts import model_to_dict   # type: ignore
 
 from podcast_cli.models.database_models import EpisodeModel, PodcastModel
+from podcast_cli.models.custom_types import PodcastType, EpisodeType
 
 
 # NOTE: This folder will house functions that can be used across
 #       multiple places in the project, and not just in one specific area.
 
 
-def exclude_keys(d: Mapping, keys: List[str]):
+def exclude_keys(d: Mapping, keys: List[str]) -> dict:
     """
     Returns a dictionary containing all keys
     except the ones specified in "keys".
@@ -26,7 +27,7 @@ def exclude_keys(d: Mapping, keys: List[str]):
     return {x: d[x] for x in d if x not in keys}
 
 
-def get_latest_number(cast: PodcastModel, max_limit: int) -> List[dict]:
+def get_latest_number(cast: PodcastModel, max_limit: int) -> List[EpisodeType]:
     """
     Will get the latest max_limit of episodes, where max_limit is an int.
     i.e get_latest_number(someCast, 5) will get the latest 5 episodes for
@@ -54,7 +55,7 @@ def get_latest_number(cast: PodcastModel, max_limit: int) -> List[dict]:
     #       as a sub-object. This will break tabulate(), so I
     #       exclude_keys() and replace it with a new "podcast" key with only
     #       its title.
-    step2: List[dict] = [
+    step2: List[EpisodeType] = [
         prep_ep_for_report(d)
         for d in step1
     ]
@@ -63,7 +64,7 @@ def get_latest_number(cast: PodcastModel, max_limit: int) -> List[dict]:
 
 
 # NOTE: might turn this into a general utility...
-def prep_ep_for_report(episode: dict) -> dict:
+def prep_ep_for_report(episode: Union[EpisodeModel, dict]) -> EpisodeType:
     """
     Helper function to prep model_to_dict(EpisodeModel())
     for use with tabulate(). It removes the "link", "description",
@@ -85,4 +86,9 @@ def prep_ep_for_report(episode: dict) -> dict:
     episode["podcast"] = episode["podcast"]["title"]
     new_ep = exclude_keys(episode, ["link", "description"])
     new_ep["pubDate"] = str(arrow.get(new_ep["pubDate"]).to("local").datetime)
-    return new_ep
+    return EpisodeType(
+        pk=episode.get("id", None),
+        title=episode.get("title", None),
+        guid=episode.get("guid", None),
+        podcast=episode.get("podcast", None)
+    )

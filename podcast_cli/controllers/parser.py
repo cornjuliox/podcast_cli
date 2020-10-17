@@ -107,7 +107,8 @@ def parse_podcast_episodeset(soup: BeautifulSoup) -> List[EpisodeType]:
 def create_podcast_model(podcast: PodcastType) -> PodcastModel:
     """
     A thin wrapper around PodcastModel.create() just so I can annotate
-    the function with PodcastModel.
+    the function with PodcastModel. .create() will insert a record
+    into the database
 
     args:
     podcast - instance of PodcastType (really just a dictionary) describing
@@ -131,7 +132,8 @@ def create_podcast_episode(
 ) -> EpisodeModel:
     """
     A thin wrapper around EpisodeModel.create() just so I can annotate
-    the function with a return type of EpisodeModel.
+    the function with a return type of EpisodeModel. .create() will
+    insert a record into the database.
 
     args:
     parent - instance of PodcastModel, describing a podcast.
@@ -165,8 +167,8 @@ def insert_to_db(
 
     args:
     podcast - instance of PodcastType, representing a podcast,
-    episodes - a list of EpisodeTypes, representing all the episodes for the passed-in
-        podcast.
+    episodes - a list of EpisodeTypes, representing all the episodes for the
+        passed-in podcast.
     """
     parent_model = create_podcast_model(podcast)
     ep_models = [create_podcast_episode(parent_model, ep) for ep in episodes]
