@@ -15,6 +15,8 @@ def podcast_list_latest_episodes(count: int):
     podcast. Default is 5 eps per podcast and results are printed
     to console in a table.
 
+    Checks locally, not remote.
+
     args:
     count - int, defaults to 5, represents how many eps per podcast
         you'd like to see
@@ -22,6 +24,7 @@ def podcast_list_latest_episodes(count: int):
     returns:
         nothing.
     """
+    click.echo("Examining local database.")
     pcs: List[PodcastModel] = PodcastModel.select()
 
     # NOTE: the goal is to get the first 5 for every podcast.

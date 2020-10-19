@@ -63,7 +63,6 @@ def get_latest_number(cast: PodcastModel, max_limit: int) -> List[EpisodeType]:
     return step2
 
 
-# NOTE: might turn this into a general utility...
 def prep_ep_for_report(episode: Union[EpisodeModel, dict]) -> EpisodeType:
     """
     Helper function to prep model_to_dict(EpisodeModel())
