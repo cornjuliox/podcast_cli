@@ -14,13 +14,16 @@ class EpisodeType(TypedDict, total=False):
     podcast: str
 
 
+# trainyard, sorting factory
+# the cage, watchtower north
 class PodcastType(TypedDict, total=False):
     pk: str
     title: str
     description: str
     link: str
     guid: str
-    podcast: str
+    # wait what why did I add this?
+    # podcast: str
 
 
 PodcastEpisodeBundle = NewType(

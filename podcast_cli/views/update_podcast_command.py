@@ -77,6 +77,8 @@ def is_remote_newer(remote: EpisodeType, local: EpisodeType) -> bool:
         return False
 
 
+# TODO: Split this into two commands
+#       "podcast_update_one", and "podcast_update_all"
 @click.command()
 @click.option("--pk", default=None)
 def podcast_update(pk: Optional[int]):
@@ -117,14 +119,25 @@ def podcast_update(pk: Optional[int]):
     else:
         parents: ModelObjectCursorWrapper = PodcastModel.select().execute()
         click.echo("Checking all podcasts for new episodes.")
+        # NOTE: what I'm doing might not be obvious here
+        #       I'm putting together a list of dicts such that
+        #       {"1": <podcast>, "2": <podcast>}
+        #       such that key is the pk of the podcast model
+        #       and value is the podcast model itself. 1 / 3
         ez_ref: dict = {
             p.id: p
             for p in parents
         }
+        # NOTE: The above allows me to create another dict
+        #       where the keys are the PK of the podcast
+        #       and the value is the latest episode model
+        #       {"1": <episode>, "2": <episode>} 2 / 3
         latest_remote_mapping: dict = {
             k[0]: get_latest_episode_remote(k[1])
             for k in ez_ref.items()
         }
+        # NOTE: Same as the above, but the source for below
+        #       is the locally stored podcasts 3 / 3
         latest_local_mapping: dict = {
             k[0]: get_latest_episode_local(k[1])
             for k in ez_ref.items()

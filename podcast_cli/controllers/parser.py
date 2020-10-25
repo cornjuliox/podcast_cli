@@ -154,9 +154,7 @@ def create_podcast_episode(
     )
 
 
-# TODO: Maybe refactor this to take a PodcastModel instead of PodcastType
-#       and then re-do the initial view to manaully call the other functions
-#       and just pass their output as input into this one?
+# TODO: Mothball this. It was the wrong thing to do..
 def insert_to_db(
     podcast: PodcastType,
     episodes: List[EpisodeType]
