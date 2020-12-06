@@ -7,7 +7,7 @@ from podcast_cli.models.custom_types import PodcastType
 def __pc_model_to_type(podcast: PodcastModel) -> PodcastType:
     """
     Internal use only, converts a PodcastModel to PodcastType.
-    
+
     args:
     podcast - PodcastModel, instance of a PodcastModel.
 
@@ -34,12 +34,14 @@ def add_one_podcast(some_podcast: PodcastType) -> PodcastModel:
     returns:
     An instance of PodcastModel.
     """
-    return PodcastModel.create(
+    mod: PodcastModel = PodcastModel.create(
         title=some_podcast["title"],
         description=some_podcast["description"],
         link=some_podcast["link"],
         guid=some_podcast["guid"],
     )
+
+    return __pc_model_to_type(mod)
 
 
 # NOTE: it's worth noting that I could probably hack something

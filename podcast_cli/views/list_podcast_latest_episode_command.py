@@ -11,7 +11,8 @@ from podcast_cli.views.utils import get_latest_number
 @click.command()
 @click.option("--count", default=5, help="Number of episodes per podcast to show.")  # noqa: E501
 def podcast_list_latest_episodes(count: int):
-    """ Lists the latest number of (--count) episodes for a given
+    """
+    Lists the latest number of (--count) episodes for a given
     podcast. Default is 5 eps per podcast and results are printed
     to console in a table.
 

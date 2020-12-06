@@ -7,6 +7,7 @@ from peewee import ModelObjectCursorWrapper         # type: ignore
 from playhouse.shortcuts import model_to_dict       # type: ignore
 
 from podcast_cli.models.database_models import PodcastModel, EpisodeModel
+from podcast_cli.controllers.podcasts import get_one_podcast
 from podcast_cli.views.utils import exclude_keys
 
 
@@ -14,17 +15,20 @@ from podcast_cli.views.utils import exclude_keys
 @click.argument("pk")
 def podcast_list_episodes(pk: int):
     try:
-        parent: PodcastModel = PodcastModel.get_by_id(pk)
+        # parent: PodcastModel = PodcastModel.get_by_id(pk)
+        # NOTE: the exceptions will bubble up, won't they?
+        parent: PodcastModel = get_one_podcast(pk)
         click.echo(
-            "Listing all recorded episodes for podcast {}".format(parent.title)
+            "Listing all recorded episodes for podcast {}".format(parent["title"])
         )
     except DoesNotExist:
         click.echo("No podcast with that id exists. Check id and try again.")
         return
 
+    # TODO: Write the episode thing getter
     q: ModelObjectCursorWrapper = (
         EpisodeModel.select()
-                    .where(EpisodeModel.podcast == parent)
+                    .where(EpisodeModel.podcast.id == parent["pk"])
                     .execute()
     )
     raw_episodes: List[EpisodeModel] = [ep for ep in q]

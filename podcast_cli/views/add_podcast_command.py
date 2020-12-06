@@ -20,12 +20,6 @@ from podcast_cli.models.custom_types import (
 from podcast_cli.models.database_models import PodcastModel
 from podcast_cli.views.utils import exclude_keys
 
-# from tabulate import tabulate
-# from peewee import Query  # type: ignore
-
-# from typing import List, Optional
-# import json
-
 
 # V2 of the podcast_add command will take the URL and grab
 # the podcast name and metadata out.

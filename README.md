@@ -6,3 +6,4 @@ The goal of this project is to build something that supports my personal podcast
 - Python 3.9 (latest and greatest lol)
 - Peewee: provides a nice interface to sqlite
 - Click: provides the framework for building a good CLI
+
